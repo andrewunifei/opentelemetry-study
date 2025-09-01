@@ -10,7 +10,8 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi (>=0.116.1,<0.117.0)",
     "uvicorn (>=0.35.0,<0.36.0)",
-    "opentelemetry-distro (>=0.57b0,<0.58)"
+    "opentelemetry-distro (>=0.57b0,<0.58)",
+    "sqlalchemy (>=2.0.43,<3.0.0)"
 ]
 
 [tool.poe]
