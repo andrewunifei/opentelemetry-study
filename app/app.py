@@ -5,6 +5,14 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine
 from sqlalchemy.orm import registry, Mapped, mapped_column, Session
 
+# ---
+
+from opentelemetry.trace import get_tracer
+
+tracer = get_tracer(instrumenting_module_name="app")
+
+# ---
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
@@ -48,8 +56,7 @@ class PessoaSchemaOut(BaseModel):
     nome: str
 
 
-@app.post("/create", response_model=PessoaSchemaOut)
-def create(pessoa: PessoaSchemaIn):
+def create_user(pessoa: PessoaSchemaIn):
     dump = pessoa.model_dump()
     p = Pessoa(**dump)
     logger.info("Criando Pessoa", extra=dump)
@@ -58,3 +65,10 @@ def create(pessoa: PessoaSchemaIn):
         session.commit()
         session.refresh(p)
     return p
+
+
+@app.post("/create", response_model=PessoaSchemaOut)
+def create(pessoa: PessoaSchemaIn):
+    with tracer.start_as_current_span("Tô em create") as t:
+        p = create_user(pessoa)
+        return p
