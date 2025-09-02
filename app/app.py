@@ -10,7 +10,9 @@ logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 reg = registry()
-engine = create_engine("sqlite:///:memory:")
+engine = create_engine(
+    "postgresql+psycopg://app_user:app_password@localhost:5433/app_db"
+)
 
 
 @reg.mapped_as_dataclass
@@ -25,8 +27,8 @@ async def lifespan(app):
     logger.info("Iniciando app")
     reg.metadata.create_all(bind=engine)
     yield
-    reg.metadata.drop_all(bind=engine)
     logger.info("Finalizando app")
+    reg.metadata.drop_all(bind=engine)
 
 
 app = FastAPI(lifespan=lifespan)
